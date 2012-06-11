@@ -25,20 +25,6 @@ export WMII_FONT='xft:DejaVuSans-10'
 set -- $(echo $WMII_NORMCOLORS $WMII_FOCUSCOLORS)
 export WMII_TERM="xterm"
 
-# Ask about MODKEY on first run
-    if ! test -d "${WMII_CONFPATH%%:*}"; then
-        mkdir "${WMII_CONFPATH%%:*}"
-        res=$(wihack -type DIALOG xmessage -nearmouse -buttons Windows,Alt -print -fn $WMII_FONT \
-              "Welcome to wmii,$wi_newline$wi_newline" \
-              "Most of wmii's default key bindings make use of the$wi_newline" \
-              "Windows key, or equivalent. For keyboards lacking such$wi_newline" \
-              "a key, many users change this to the Alt key.$wi_newline$wi_newline" \
-              "Which would you prefer?")
-        [ "$res" = "Alt" ] && MODKEY=Mod1
-        echo "MODKEY=$MODKEY" >"${WMII_CONFPATH%%:*}/wmiirc_local"
-        chmod +x "${WMII_CONFPATH%%:*}/wmiirc_local"
-    fi
-
 # Menu history
 hist="${WMII_CONFPATH%%:*}/history"
 histnum=5000
@@ -212,16 +198,16 @@ Key $MODKEY-p      # Open program menu
 Key $MODKEY-Return # Launch a terminal
 	eval wmiir setsid $WMII_TERM &
 
-KeyGroup Other
-Key $MODKEY-Control-t # Toggle all other key bindings
-	case $(wmiir read /keys | wc -l | tr -d ' \t\n') in
-	0|1)
-		echo -n "$Keys" | wmiir write /keys
-		wmiir xwrite /ctl grabmod $MODKEY;;
-	*)
-		wmiir xwrite /keys $MODKEY-Control-t
-		wmiir xwrite /ctl grabmod Mod3;;
-	esac
+# KeyGroup Other
+# Key $MODKEY-Control-t # Toggle all other key bindings
+# 	case $(wmiir read /keys | wc -l | tr -d ' \t\n') in
+# 	0|1)
+# 		echo -n "$Keys" | wmiir write /keys
+# 		wmiir xwrite /ctl grabmod $MODKEY;;
+# 	*)
+# 		wmiir xwrite /keys $MODKEY-Control-t
+# 		wmiir xwrite /ctl grabmod Mod3;;
+# 	esac
 
 KeyGroup Tag actions
 Key $MODKEY-t       # Change to another tag
