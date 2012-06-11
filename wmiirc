@@ -3,6 +3,13 @@
 wmiiscript=wmiirc # For wmii.sh
 . wmii.sh
 
+# Patch from http://www.digipedia.pl/usenet/thread/17861/3592/
+# We replace all occurances of "wmiir xwrite /ctl am_view" by "am_switch_view"
+# defined below
+am_switch_view() {
+    AM_PREV_TAG=$(wi_seltag)
+    wmiir xwrite /ctl view $1
+}
 
 # Configuration Variables
 MODKEY=Mod4
@@ -81,7 +88,7 @@ Event NotUrgentTag
 	wmiir xwrite "/lbar/$@" label "$@"
 Event LeftBarClick LeftBarDND
 	shift
-	wmiir xwrite /ctl view "$@"
+	am_switch_view "$@"
 Event Unresponsive
 	{
 		client=$1; shift
@@ -118,7 +125,7 @@ Menu LBar-3-Delete
 		else wmiir xwrite /client/$c/ctl tags -$tag
 		fi
 		[ "$tag" = "$(wi_seltag)" ] &&
-			wmiir xwrite /ctl view $(wi_tags | wi_nexttag)
+			am_switch_view $(wi_tags | wi_nexttag)
 	done
 Event LeftBarMouseDown
 	wi_fnmenu LBar "$@" &
@@ -211,19 +218,23 @@ Key $MODKEY-Return # Launch a terminal
 
 KeyGroup Tag actions
 Key $MODKEY-t       # Change to another tag
-	wmiir xwrite /ctl view $(wi_tags | wimenu -h "${hist}.tags" -n 50) &
+	am_switch_view $(wi_tags | wimenu -h "${hist}.tags" -n 50) &
 Key $MODKEY-Shift-t # Retag the selected client
 	# Assumes left-to-right order of evaluation
 	wmiir xwrite /client/$(wi_selclient)/ctl tags $(wi_tags | wimenu -h "${hist}.tags" -n 50) &
 Key $MODKEY-period	    # Move to the next tag
-	wmiir xwrite /ctl view $(wi_tags | wi_nexttag)
+	am_switch_view $(wi_tags | wi_nexttag)
 Key $MODKEY-comma	    # Move to the previous tag
-	wmiir xwrite /ctl view $(wi_tags | sort -r | wi_nexttag)
+	am_switch_view $(wi_tags | sort -r | wi_nexttag)
+Key $MODKEY-slash		# Move to previous selected tag
+    if [ -n $AM_PREV_TAG ]; then
+      am_switch_view $AM_PREV_TAG
+    fi
 !
 	for i in 0 1 2 3 4 5 6 7 8 9; do
 		wi_events <<!
 Key $MODKEY-$i		 # Move to the numbered view
-	wmiir xwrite /ctl view "$i"
+	am_switch_view "$i"
 Key $MODKEY-Shift-$i     # Retag selected client with the numbered tag
 	wmiir xwrite /client/sel/ctl tags "$i"
 !
