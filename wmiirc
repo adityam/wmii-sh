@@ -139,6 +139,8 @@ Action exec
 	wmiir xwrite /ctl exec "$@"
 Action rehash
 	wi_proglist $PATH >$progsfile
+Action lock
+    slock 
 Action status
 	set +xv
 	if wmiir remove /rbar/status 2>/dev/null; then
