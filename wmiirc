@@ -215,9 +215,9 @@ Key $MODKEY-t       # Change to another tag
 Key $MODKEY-Shift-t # Retag the selected client
 	# Assumes left-to-right order of evaluation
 	wmiir xwrite /client/$(wi_selclient)/ctl tags $(wi_tags | wimenu -h "${hist}.tags" -n 50) &
-Key $MODKEY-n	    # Move to the next tag
+Key $MODKEY-period	    # Move to the next tag
 	wmiir xwrite /ctl view $(wi_tags | wi_nexttag)
-Key $MODKEY-b	    # Move to the previous tag
+Key $MODKEY-comma	    # Move to the previous tag
 	wmiir xwrite /ctl view $(wi_tags | sort -r | wi_nexttag)
 !
 	for i in 0 1 2 3 4 5 6 7 8 9; do
