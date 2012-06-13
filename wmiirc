@@ -203,6 +203,8 @@ Key $MODKEY-a      # Open wmii actions menu
 	action $(wi_actions | wimenu -h "${hist}.actions" -n $histnum) &
 Key $MODKEY-p      # Open program menu
 	eval wmiir setsid "$(wimenu -h "${hist}.progs" -n $histnum <$progsfile)" &
+Key $MODKEY-o      # Open program menu
+	eval wmiir setsid "$(wimenu -h "${hist}.progs" -n $histnum <$progsfile)" &
 
 Key $MODKEY-Return # Launch a terminal
 	eval wmiir setsid $WMII_TERM &
