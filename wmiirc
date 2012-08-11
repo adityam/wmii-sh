@@ -25,6 +25,7 @@ noticebar=/rbar/!notice
 # Colors tuples: "<text> <background> <border>"
 export WMII_NORMCOLORS='#dcdccc #3f3f3f #434443'
 export WMII_FOCUSCOLORS='#000d18 #8faf9f #4f4f4f'
+export WMII_BARCOLORS='#dcdcc #8fa9f #4f4f4f'
 
 export WMII_BACKGROUND='#333333'
 export WMII_FONT='xft:DejaVuSans-10'
@@ -57,9 +58,20 @@ wmiir write /rules <<!
     /^ROX-Filer:/ group=0
 !
 
+# Creating bar elements
+# The bars get sorted according to name, so don't rename them.
+
+echo $WMII_BARCOLORS | wmiir create /rbar/1
+echo $WMII_BARCOLORS | wmiir create /rbar/2
+echo $WMII_BARCOLORS | wmiir create /rbar/3
+
 # Status Bar Info
 status() {
-	echo -n label $(date +"%a %d %b %I:%M")
+    echo -n label $(ps aux | awk '{sum +=$4}; END {print "Mem: " sum "%"}') | wmiir write /rbar/1
+    if [ -d /sys/class/power_supply/BAT0/ ]; then
+      echo -n label Bat: $(acpi -b | cut -d':' -f 2 | cut -d',' -f 2) | wmiir write /rbar/2
+    fi
+	echo -n label $(date +"%a %d %b %I:%M") | wmiir write /rbar/3
 }
 
 # Generic overridable startup details
@@ -144,11 +156,7 @@ Action lock
     slock 
 Action status
 	set +xv
-	if wmiir remove /rbar/status 2>/dev/null; then
-		sleep 2
-	fi
-	echo colors "$WMII_NORMCOLORS" | wmiir create /rbar/status
-	while status | wmiir write /rbar/status; do
+	while status | status; do
 		sleep 1
 	done
 
@@ -220,6 +228,15 @@ Key $MODKEY-Return # Launch a terminal
 # 		wmiir xwrite /keys $MODKEY-Control-t
 # 		wmiir xwrite /ctl grabmod Mod3;;
 # 	esac
+
+
+KeyGroup Multimedia
+Key XF86AudioMute
+        amixer sset Master toggle
+Key XF86AudioLowerVolume
+        amixer sset Master 2-
+Key XF86AudioRaiseVolume
+        amixer sset Master 2+
 
 KeyGroup Tag actions
 Key $MODKEY-t       # Change to another tag
