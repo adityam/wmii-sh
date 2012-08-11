@@ -61,19 +61,32 @@ wmiir write /rules <<!
 
 # Status Bar Info
 status() {
-    echo -n label $(ps aux | awk '{sum +=$4}; END {print "Mem: " sum "%"}') | wmiir write /rbar/mem
+    # memory
+    echo -n label $(ps aux | awk '{sum +=$4}; END {print "Mem: " sum "%"}') | wmiir write /rbar/1:mem
 
+    # battery
     if [ -d /sys/class/power_supply/BAT0/ ]; then
-      echo -n label Bat: $(acpi -b | cut -d':' -f 2 | cut -d',' -f 2) | wmiir write /rbar/bat
-    fi
-	echo -n label $(date +"%a %d %b %I:%M") | wmiir write /rbar/date
-    echo -n label $(amixer sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d ' ' -f 4) | wmiir write /rbar/vol
-    if [ "$(amixer sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d' ' -f 6)" = "[off]" ] ; then 
-	    wmiir xwrite /rbar/vol colors "$WMII_NOTICECOLORS"
-    else
-	    wmiir xwrite /rbar/vol colors "$WMII_NORMCOLORS"
+      bat=$(acpi -b | cut -d':' -f 2 | cut -d',' -f 2 | sed -e 's/%//;s/ //')
+      echo -n label "Bat: $bat%"  | wmiir write /rbar/2:bat
+      # Highlight battery if battery is less than 20%
+      if [ $bat -le 20 ]; then
+	    wmiir xwrite /rbar/2:bat colors "$WMII_NOTICECOLORS"
+      fi
+
     fi
 
+    # date
+	echo -n label $(date +"%a %d %b %I:%M") | wmiir write /rbar/3:date
+
+    # vol
+    echo -n label $(amixer sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d ' ' -f 4) | wmiir write /rbar/4:vol
+
+    # Highlight volume if volume is muted
+    if [ "$(amixer sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d' ' -f 6)" = "[off]" ] ; then 
+	    wmiir xwrite /rbar/4:vol colors "$WMII_NOTICECOLORS"
+    else
+	    wmiir xwrite /rbar/4:vol colors "$WMII_NORMCOLORS"
+    fi
 
 }
 
@@ -83,14 +96,17 @@ startup() { witray & }
 wi_runconf -s wmiirc_local
 startup
 
+# Remove existing right bars
 for r in $(wmiir ls /rbar); do
     wmiir remove "/rbar/$r"
 done
 
-echo colors "$WMII_NORMCOLORS$wi_newline"  | wmiir create /rbar/mem
-echo colors "$WMII_NORMCOLORS$wi_newline"  | wmiir create /rbar/bat
-echo colors "$WMII_NORMCOLORS$wi_newline"  | wmiir create /rbar/date
-echo colors "$WMII_NORMCOLORS$wi_newline"  | wmiir create /rbar/vol
+# Note that bars are sorted according to their name
+
+echo colors "$WMII_NORMCOLORS$wi_newline" | wmiir create /rbar/1:mem
+echo colors "$WMII_NORMCOLORS$wi_newline" | wmiir create /rbar/2:bat
+echo colors "$WMII_NORMCOLORS$wi_newline" | wmiir create /rbar/3:date
+echo colors "$WMII_NORMCOLORS$wi_newline" | wmiir create /rbar/4:vol
 # echo colors $WMII_NORMCOLORS | wmiir create $noticebar
 
 # Event processing
