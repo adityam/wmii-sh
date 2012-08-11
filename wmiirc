@@ -61,17 +61,18 @@ wmiir write /rules <<!
 # Creating bar elements
 # The bars get sorted according to name, so don't rename them.
 
-echo $WMII_BARCOLORS | wmiir create /rbar/1
-echo $WMII_BARCOLORS | wmiir create /rbar/2
-echo $WMII_BARCOLORS | wmiir create /rbar/3
+echo $WMII_BARCOLORS | wmiir create /rbar/mem
+echo $WMII_BARCOLORS | wmiir create /rbar/bat
+echo $WMII_BARCOLORS | wmiir create /rbar/date
 
 # Status Bar Info
 status() {
-    echo -n label $(ps aux | awk '{sum +=$4}; END {print "Mem: " sum "%"}') | wmiir write /rbar/1
+    echo -n label $(ps aux | awk '{sum +=$4}; END {print "Mem: " sum "%"}') | wmiir write /rbar/mem
+
     if [ -d /sys/class/power_supply/BAT0/ ]; then
-      echo -n label Bat: $(acpi -b | cut -d':' -f 2 | cut -d',' -f 2) | wmiir write /rbar/2
+      echo -n label Bat: $(acpi -b | cut -d':' -f 2 | cut -d',' -f 2) | wmiir write /rbar/bat
     fi
-	echo -n label $(date +"%a %d %b %I:%M") | wmiir write /rbar/3
+	echo -n label $(date +"%a %d %b %I:%M") | wmiir write /rbar/date
 }
 
 # Generic overridable startup details
