@@ -25,7 +25,8 @@ noticebar=/rbar/!notice
 # Colors tuples: "<text> <background> <border>"
 export WMII_NORMCOLORS='#dcdccc #3f3f3f #434443'
 export WMII_FOCUSCOLORS='#000d18 #8faf9f #4f4f4f'
-export WMII_BARCOLORS='#dcdcc #8fa9f #4f4f4f'
+export WMII_NOTICECOLORS='#000d18 #f8de7e #4f4f4f'
+#export WMII_NOTICECOLORS='#dcdcc #8fa9f #4f4f4f'
 
 export WMII_BACKGROUND='#333333'
 export WMII_FONT='xft:DejaVuSans-10'
@@ -58,13 +59,6 @@ wmiir write /rules <<!
     /^ROX-Filer:/ group=0
 !
 
-# Creating bar elements
-# The bars get sorted according to name, so don't rename them.
-
-echo $WMII_BARCOLORS | wmiir create /rbar/mem
-echo $WMII_BARCOLORS | wmiir create /rbar/bat
-echo $WMII_BARCOLORS | wmiir create /rbar/date
-
 # Status Bar Info
 status() {
     echo -n label $(ps aux | awk '{sum +=$4}; END {print "Mem: " sum "%"}') | wmiir write /rbar/mem
@@ -73,6 +67,14 @@ status() {
       echo -n label Bat: $(acpi -b | cut -d':' -f 2 | cut -d',' -f 2) | wmiir write /rbar/bat
     fi
 	echo -n label $(date +"%a %d %b %I:%M") | wmiir write /rbar/date
+    echo -n label $(amixer sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d ' ' -f 4) | wmiir write /rbar/vol
+    if [ "$(amixer sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d' ' -f 6)" = "[off]" ] ; then 
+	    wmiir xwrite /rbar/vol colors "$WMII_NOTICECOLORS"
+    else
+	    wmiir xwrite /rbar/vol colors "$WMII_NORMCOLORS"
+    fi
+
+
 }
 
 # Generic overridable startup details
@@ -81,7 +83,15 @@ startup() { witray & }
 wi_runconf -s wmiirc_local
 startup
 
-echo colors $WMII_NORMCOLORS | wmiir create $noticebar
+for r in $(wmiir ls /rbar); do
+    wmiir remove "/rbar/$r"
+done
+
+echo colors "$WMII_NORMCOLORS$wi_newline"  | wmiir create /rbar/mem
+echo colors "$WMII_NORMCOLORS$wi_newline"  | wmiir create /rbar/bat
+echo colors "$WMII_NORMCOLORS$wi_newline"  | wmiir create /rbar/date
+echo colors "$WMII_NORMCOLORS$wi_newline"  | wmiir create /rbar/vol
+# echo colors $WMII_NORMCOLORS | wmiir create $noticebar
 
 # Event processing
 wi_events <<'!'
@@ -143,6 +153,7 @@ Menu LBar-3-Delete
 	done
 Event LeftBarMouseDown
 	wi_fnmenu LBar "$@" &
+
 
 # Actions
 Action showkeys
