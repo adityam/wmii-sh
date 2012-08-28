@@ -79,10 +79,10 @@ status() {
 	echo -n label $(date +"%a %d %b %I:%M") | wmiir write /rbar/3:date
 
     # vol
-    echo -n label $(amixer sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d ' ' -f 4) | wmiir write /rbar/4:vol
+    echo -n label $(amixer -c 0 sget Master | grep 'Mono' | cut -d':' -f 2 | cut -d ' ' -f 4) | wmiir write /rbar/4:vol
 
     # Highlight volume if volume is muted
-    if [ "$(amixer sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d' ' -f 6)" = "[off]" ] ; then 
+    if [ "$(amixer -c 0 sget Master | grep 'Mono:' | cut -d':' -f 2 | cut -d' ' -f 6)" = "[off]" ] ; then 
 	    wmiir xwrite /rbar/4:vol colors "$WMII_NOTICECOLORS"
     else
 	    wmiir xwrite /rbar/4:vol colors "$WMII_NORMCOLORS"
@@ -260,11 +260,17 @@ Key $MODKEY-Return # Launch a terminal
 
 KeyGroup Multimedia
 Key XF86AudioMute
-        amixer sset Master toggle
+        amixer -c 0 sset Master toggle
 Key XF86AudioLowerVolume
-        amixer sset Master 2-
+        amixer -c 0 sset Master 2-
 Key XF86AudioRaiseVolume
-        amixer sset Master 2+
+        amixer -c 0 sset Master 2+
+Key $MODKEY-Pause
+        amixer -c 0 sset Master toggle
+Key $MODKEY-Next
+        amixer -c 0 sset Master 2-
+Key $MODKEY-Prior
+        amixer -c 0 sset Master 2+
 
 KeyGroup Tag actions
 Key $MODKEY-t       # Change to another tag
