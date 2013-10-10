@@ -8,7 +8,12 @@ wmiiscript=wmiirc # For wmii.sh
 # defined below
 am_switch_view() {
     AM_PREV_TAG=$(wi_seltag)
-    wmiir xwrite /ctl view $1
+    tag=`wmiir ls /tag | sed 's/\/$//' | grep -m 1 ^$1`
+	if [ "$tag" = "" ]; then
+      wmiir xwrite /ctl view $1
+    else
+      wmiir xwrite /ctl view $tag
+    fi
 }
 
 # Configuration Variables
